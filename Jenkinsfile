@@ -3,7 +3,7 @@ pipeline {
 
   triggers {
     // every 5 minutes on Mondays
-    cron('H/5 * * * 1')
+    cron('H/2 * * * *')
   }
 
   options {
