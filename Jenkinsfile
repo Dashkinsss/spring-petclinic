@@ -6,12 +6,6 @@ pipeline {
     cron('H/5 * * * 1')
   }
 
-  tools {
-    // если в Jenkins настроены tool installations:
-    // jdk 'JDK17'
-    // maven 'Maven3'
-  }
-
   stages {
     stage('Checkout') {
       steps {
