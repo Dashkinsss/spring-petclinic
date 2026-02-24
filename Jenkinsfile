@@ -2,12 +2,15 @@ pipeline {
   agent any
 
   triggers {
-    // every 5 minutes on Mondays
+    // TEMP for testing: every 2 minutes (any day)
     cron('H/2 * * * *')
+    // For submission switch back:
+    // cron('H/5 * * * 1')
   }
 
   options {
     timestamps()
+    disableConcurrentBuilds()
   }
 
   stages {
@@ -20,6 +23,7 @@ pipeline {
     stage('Build & Unit Tests') {
       steps {
         sh 'chmod +x mvnw'
+        // run tests to generate surefire + jacoco exec data
         sh './mvnw -B clean test'
       }
       post {
@@ -31,11 +35,20 @@ pipeline {
 
     stage('JaCoCo Coverage Report') {
       steps {
-        // generates: target/site/jacoco/index.html
+        // generate HTML report: target/site/jacoco/index.html
         sh './mvnw -B jacoco:report'
       }
       post {
         always {
+          // 1) Publish JaCoCo into Jenkins UI (requires JaCoCo plugin)
+          jacoco(
+            execPattern: 'target/*.exec',
+            classPattern: 'target/classes',
+            sourcePattern: 'src/main/java',
+            changeBuildStatus: false
+          )
+
+          // 2) Also archive the HTML report (works even without plugin)
           archiveArtifacts artifacts: 'target/site/jacoco/**', allowEmptyArchive: true
         }
       }
