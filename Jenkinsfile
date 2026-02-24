@@ -2,8 +2,6 @@ pipeline {
   agent any
 
   triggers {
-    // TEMP for testing: every 2 minutes (any day)
-    cron('H/2 * * * *')
     // For submission switch back:
     // cron('H/5 * * * 1')
   }
