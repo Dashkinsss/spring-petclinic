@@ -6,6 +6,10 @@ pipeline {
     cron('H/5 * * * 1')
   }
 
+  options {
+    timestamps()
+  }
+
   stages {
     stage('Checkout') {
       steps {
@@ -15,24 +19,31 @@ pipeline {
 
     stage('Build & Unit Tests') {
       steps {
-        sh 'mvn -B clean test'
+        sh 'chmod +x mvnw'
+        sh './mvnw -B clean test'
       }
       post {
         always {
-          junit 'target/surefire-reports/*.xml'
+          junit testResults: 'target/surefire-reports/*.xml', allowEmptyResults: true
         }
       }
     }
 
-    stage('Jacoco Coverage Report') {
+    stage('JaCoCo Coverage Report') {
       steps {
-        sh 'mvn -B jacoco:report'
+        // generates: target/site/jacoco/index.html
+        sh './mvnw -B jacoco:report'
+      }
+      post {
+        always {
+          archiveArtifacts artifacts: 'target/site/jacoco/**', allowEmptyArchive: true
+        }
       }
     }
 
     stage('Package Artifact') {
       steps {
-        sh 'mvn -B -DskipTests package'
+        sh './mvnw -B -DskipTests package'
       }
       post {
         success {
